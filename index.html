@@ -1,40 +1,15 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>지원금 잔여 내역 조회</title>
-<style>
-  body { font-family:sans-serif; padding:20px; background:#f5f5f5; }
-  input, button { padding:10px; margin:5px; font-size:16px; }
-</style>
-</head>
-<body>
-<h2>지원금 잔여 내역 조회</h2>
-
-<input id="name" placeholder="이름">
-<input id="pw" placeholder="비밀번호" type="password">
-<button onclick="check()">조회</button>
-
-<p id="result"></p>
-
 <script>
-const SHEET_ID = "1oupd4NwonWpdc5RocP5GQoY5SIyGFI_z_OIhWmjTKek";  // 네 시트 ID
-const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+const CSV_URL = "https://docs.google.com/spreadsheets/d/1oupd4NwonWpdc5RocP5GQoY5SIyGFI_z_OIhWmjTKek/pub?output=csv";
 
 async function fetchData() {
-  const res = await fetch(URL);
+  const res = await fetch(CSV_URL);
   const text = await res.text();
-
-  // google.visualization.Query.setResponse(...); 에서 {} 안 부분만 추출
-  const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-  const json = JSON.parse(jsonText);
-
-  const rows = json.table.rows;
+  const rows = text.trim().split("\n").map(r => r.split(","));
   const data = {};
-  for (let r of rows) {
-    const name = r.c[0]?.v;
-    const pw = r.c[1]?.v.toString();
-    const balance = r.c[5]?.v; // 6번째 열(F열)
+  for (let i = 1; i < rows.length; i++) {
+    const name = rows[i][0];
+    const pw = rows[i][1];
+    const balance = rows[i][5]; // 6번째 열(F)
     data[name] = { pw, balance };
   }
   return data;
@@ -53,5 +28,3 @@ async function check() {
   }
 }
 </script>
-</body>
-</html>
